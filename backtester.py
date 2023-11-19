@@ -7,7 +7,7 @@ from matplotlib.ticker import FuncFormatter
 
 # -----------------------------------------------------------------------------------
 # Author: Hunter Gould
-# Date: 11/01/23
+# Date: 11/19/23
 # Description: backtester.py is part of a portfolio analysis suite.
 #              It offers backtesting capabilities, allowing users to test investment
 #              strategies against historical market data. This helps in understanding

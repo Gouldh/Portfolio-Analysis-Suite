@@ -1,23 +1,22 @@
-# Portfolio Optimization Using Monte Carlo Simulation with Analysis
+# Comprehensive Portfolio Analysis Suite
 
 ## Project Overview
-This repository hosts a portfolio analysis tool that leverages Monte Carlo simulations to optimize investment strategies. The tool analyzes a set of stocks over a ten-year period, comparing portfolio performance against the S&P 500 benchmark. Key features include optimal portfolio weighting simulation, probability distribution generation, and  results plotting. Implemented in Python, the project utilizes libraries such as `yfinance` for data retrieval, `numpy` for mathematical operations, `pandas` for data management, `matplotlib` for visualizations, and `seaborn` for enhanced plotting capabilities.
+This repository hosts a comprehensive portfolio analysis suite, designed to provide deep insights into investment strategies. The suite consists of two main components: a portfolio optimizer (`optimizer.py`) and a backtesting tool (`backtester.py`). The optimizer uses Monte Carlo simulations for asset allocation, while the backtester assesses strategies against historical data. Built with Python, the suite leverages libraries such as `yfinance` for financial data, `numpy` and `pandas` for numerical analysis and data management, and `matplotlib` and `seaborn` for advanced visualizations.
 
 ## Features
-- **Monte Carlo Simulation**: Conducts 10,000 portfolio weight simulations to determine optimal asset allocation.
-- **Performance Projection**: Conducts 1,000 portfolio performance simulations to generate probability distribution for the portfolio.
-- **Historical Data Analysis**: Analyzes ten years of stock data for a given portfolio, using stocks like AAPL, JNJ, PG, etc example assets.
-- **Benchmarking**: Compares optimized portfolio performance with the S&P 500 index and given portfolio, using both as benchmarks.
-- **Visualization**: Utilizes `matplotlib` and `seaborn` for generating plots of probability distributions, portfolio metrics, and comparisons.
-- **Portfolio Metrics Calculation**: Calculates annualized returns, volatility, and Sharpe ratios for various portfolio scenarios.
-- **Comparisons**: Provides visualizations to compare the performance of optimized, current, and median volatility portfolios.
+- **Portfolio Optimization**: The optimizer conducts simulations to find the ideal asset allocation, maximizing returns and minimizing risks.
+- **Strategy Backtesting**: The backtester evaluates investment strategies against historical market data, providing a realistic performance assessment.
+- **Visualization Tools**: Both tools use `matplotlib` and `seaborn` for generating insightful plots, such as probability distributions, asset allocations, and performance metrics.
+- **Comprehensive Data Analysis**: Analyzes a wide range of stock data over extensive periods, employing tools like `numpy` and `pandas` for robust data handling.
+- **Interactive Analysis**: Users can customize analysis parameters to suit different investment scenarios and strategies.
+- **Historical Benchmarking**: Compares portfolio performance against major benchmarks like the S&P 500, offering a relative performance perspective.
 
 ## Installation
-To use this advanced portfolio analysis tool, follow these steps:
+To use the Portfolio Analysis Suite, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Gouldh/Portfolio-Optimization-With-Projection.git
+   git clone https://github.com/Gouldh/Portfolio-Analysis-Suite.git
    ```
 2. Navigate to the repository's directory
    ```bash
@@ -29,13 +28,32 @@ To use this advanced portfolio analysis tool, follow these steps:
    ```
 
 ## Usage
-Run the `main.py` script to initiate the analysis:
+To utilize the Portfolio Analysis Suite, you need to run the respective scripts for portfolio optimization and backtesting.
 
+### Portfolio Optimization
+Run the `optimizer.py` script to initiate the portfolio optimization process:
 ```bash
-python main.py
+python optimizer.py
 ```
+This script performs Monte Carlo simulations to determine the optimal asset allocation, aiming to maximize returns and minimize risks.
 
-Make sure your Python environment is set up with necessary libraries like `yfinance`, `numpy`, `pandas`, `matplotlib`, and `seaborn`.
+### Strategy Backtesting
+Execute the backtester.py script to conduct backtesting of your investment strategies:
+```bash
+python backtester.py
+```
+This tool assesses investment strategies against historical market data, providing a realistic assessment of potential performance and risk.
+
+Ensure your Python environment is set up with necessary libraries such as `yfinance`, `numpy`, `pandas`, `matplotlib`, and `seaborn`.
+
+## Contributing
+Contributions to the Portfolio Analysis Suite are welcome.
+
+## Support
+If you encounter any issues or have questions, feel free to open an issue on the GitHub repository.
+
+## Authors
+- Hunter Gould 
 
 ## License
-This project is made available under the MIT License. Refer to the `LICENSE` file for more details.
+This project is licensed under the MIT License - see the `LICENSE` file for details.

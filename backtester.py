@@ -6,10 +6,12 @@ import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
 # Constants for portfolio analysis
+# Constants for portfolio analysis
 STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Stock tickers representing a diverse portfolio
 INITIAL_WEIGHTS = np.array([.1, .1, .1, .1, .1, .1, .1, .1, .1, .1])  # Initial weights assigned equally to each stock
 ANALYSIS_START_DATE = '2013-11-18'
-ANALYSIS_END_DATE = '2023-11-18'
+ANALYSIS_END_DATE = '2018-11-18'
+TESTING_END_DATE = '2023-11-18'
 BENCHMARK_INDEX = 'SPY'  # Using S&P 500 as the benchmark index
 RISK_FREE_RATE = 4.611 / 100  # Using 3-Year T-Bill Returns as the risk-free rate
 NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Number of random portfolio weights for Monte Carlo simulation
@@ -55,7 +57,7 @@ print("Monte Carlo Simulation Completed.")
 sorted_by_volatility = simulated_portfolios.sort_values(by='Annualized Volatility').reset_index()
 optimal_sharpe_idx = simulated_portfolios['Sharpe Ratio'].idxmax()
 median_volatility_idx = sorted_by_volatility.iloc[len(sorted_by_volatility) // 2]['Simulation Index']
-print(f"Achieved Maximum Sharpe Ratio of: {simulated_portfolios['Sharpe Ratio'][optimal_sharpe_idx]}")
+print(f"Achieved Maximum Sharpe Ratio of: {simulated_portfolios['Sharpe Ratio'][optimal_sharpe_idx]:.2f}")
 
 # Extracting and displaying weights of optimal and median volatility portfolios
 optimal_weights = recorded_weights[:, optimal_sharpe_idx]
@@ -139,12 +141,28 @@ ax.yaxis.label.set_color('white')
 ax.tick_params(axis='x', colors='white')
 ax.tick_params(axis='y', colors='white')
 ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{100 * y:.2f}%'))
+ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.2f}%'))
 
 for spine in ax.spines.values():
     spine.set_edgecolor('white')
 
 palette = sns.color_palette("hsv", len(portfolio_weights) + 1)
 
+subsequent_data = yf.download(STOCK_TICKERS, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+
+# Download the new period data for the market (SPY)
+subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+
+# Calculate the portfolio returns using the optimal weights
+subsequent_daily_returns = subsequent_data.pct_change().dropna()
+portfolio_subsequent_return = np.sum(optimal_weights * subsequent_daily_returns.mean()) * 252
+
+# Calculate the market returns for the same period
+subsequent_market_daily_returns = subsequent_market_data.pct_change().dropna()
+market_subsequent_return = subsequent_market_daily_returns.mean() * 252
+
+plt.axvline(x=market_subsequent_return * 100, color='Purple',)
+plt.axvline(x=portfolio_subsequent_return * 100, color='Yellow',)
 # Plotting the distributions for each portfolio
 for i, (portfolio_name, final_values) in enumerate(portfolio_results.items()):
     color = palette[i]
@@ -175,7 +193,7 @@ optimal_beats_market = sum(np.array(portfolio_results['Optimized Portfolio']) > 
 
 # Displaying the probability comparison as text
 prob_text = f"Probability Optimal > Current: {optimal_beats_initial:.2%}\nProbability Optimal > Market: {optimal_beats_market:.2%}"
-plt.text(0.69, 0.98, prob_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
+plt.text(0.67, 0.92, prob_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
 # Displaying the optimal weights as text
@@ -183,6 +201,9 @@ optimal_weights_text = "Optimal Weights:\n" + "\n".join([f"{STOCK_TICKERS[i]}: {
 plt.text(0.115, .98, optimal_weights_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
+
+plt.text(0.67, 0.98, f"Actual Market Return: {market_subsequent_return:.2%}\nActual Optimized Portfolio Return: {portfolio_subsequent_return:.2%}", fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
+         bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 # Setting labels, title and legend
 plt.xlabel('Final Fund % Returns')
 plt.ylabel('Density')

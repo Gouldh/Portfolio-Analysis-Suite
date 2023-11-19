@@ -5,6 +5,21 @@ import numpy as np
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
+# -----------------------------------------------------------------------------------
+# Author: Hunter Gould
+# Date: 11/19/23
+# Description: optimizer.py is part of a portfolio analysis suite.
+#              It focuses on portfolio optimization using Monte Carlo simulations to
+#              find the optimal asset allocation that maximizes returns while minimizing
+#              risk. It applies principles of Modern Portfolio Theory and constructs
+#              the Efficient Frontier.
+#
+# Note: Past performance is not indicative of future results. This optimizer aids in
+#       assessing risk by comparing various portfolio allocations and their potential
+#       volatility.
+# -----------------------------------------------------------------------------------
+
+
 # Constants for portfolio analysis
 STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Stock tickers representing a diverse portfolio
 INITIAL_WEIGHTS = np.array([.1, .1, .1, .1, .1, .1, .1, .1, .1, .1])  # Initial weights assigned equally to each stock

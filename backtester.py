@@ -5,7 +5,21 @@ import numpy as np
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
-# Constants for portfolio analysis
+# -----------------------------------------------------------------------------------
+# Author: Hunter Gould
+# Date: 11/01/23
+# Description: backtester.py is part of a portfolio analysis suite.
+#              It offers backtesting capabilities, allowing users to test investment
+#              strategies against historical market data. This helps in understanding
+#              potential performance and risks associated with different investment
+#              approaches.
+#
+# Note: Remember that historical data does not guarantee future results. This backtesting
+#       tool is crucial for evaluating the robustness of investment strategies under
+#       various market conditions.
+# -----------------------------------------------------------------------------------
+
+
 # Constants for portfolio analysis
 STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Stock tickers representing a diverse portfolio
 INITIAL_WEIGHTS = np.array([.1, .1, .1, .1, .1, .1, .1, .1, .1, .1])  # Initial weights assigned equally to each stock
@@ -127,6 +141,23 @@ print("Market Performance Simulation Completed.")
 
 print("\n================== Completed: Probability Distribution Generation ==================\n")
 
+
+print("\n================== Starting: Backtesting ==================\n")
+subsequent_data = yf.download(STOCK_TICKERS, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+
+# Download the new period data for the market (SPY)
+subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+
+# Calculate the portfolio returns using the optimal weights
+subsequent_daily_returns = subsequent_data.pct_change().dropna()
+portfolio_subsequent_return = np.sum(optimal_weights * subsequent_daily_returns.mean()) * 252
+
+# Calculate the market returns for the same period
+subsequent_market_daily_returns = subsequent_market_data.pct_change().dropna()
+market_subsequent_return = subsequent_market_daily_returns.mean() * 252
+
+print("\n================== Completed: Backtesting ==================\n")
+
 # Plotting Results
 print("\n================== Starting: Plotting ==================\n")
 # Setting up the plot environment and plotting probability distributions for portfolios and market
@@ -147,19 +178,6 @@ for spine in ax.spines.values():
     spine.set_edgecolor('white')
 
 palette = sns.color_palette("hsv", len(portfolio_weights) + 1)
-
-subsequent_data = yf.download(STOCK_TICKERS, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
-
-# Download the new period data for the market (SPY)
-subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
-
-# Calculate the portfolio returns using the optimal weights
-subsequent_daily_returns = subsequent_data.pct_change().dropna()
-portfolio_subsequent_return = np.sum(optimal_weights * subsequent_daily_returns.mean()) * 252
-
-# Calculate the market returns for the same period
-subsequent_market_daily_returns = subsequent_market_data.pct_change().dropna()
-market_subsequent_return = subsequent_market_daily_returns.mean() * 252
 
 plt.axvline(x=market_subsequent_return * 100, color='Purple',)
 plt.axvline(x=portfolio_subsequent_return * 100, color='Yellow',)
@@ -201,9 +219,10 @@ optimal_weights_text = "Optimal Weights:\n" + "\n".join([f"{STOCK_TICKERS[i]}: {
 plt.text(0.115, .98, optimal_weights_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
-
+# Displaying actual results from time period selected
 plt.text(0.67, 0.98, f"Actual Market Return: {market_subsequent_return:.2%}\nActual Optimized Portfolio Return: {portfolio_subsequent_return:.2%}", fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
+
 # Setting labels, title and legend
 plt.xlabel('Final Fund % Returns')
 plt.ylabel('Density')

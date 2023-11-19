@@ -139,6 +139,7 @@ ax.yaxis.label.set_color('white')
 ax.tick_params(axis='x', colors='white')
 ax.tick_params(axis='y', colors='white')
 ax.yaxis.set_major_formatter(FuncFormatter(lambda y, _: f'{100 * y:.2f}%'))
+ax.xaxis.set_major_formatter(FuncFormatter(lambda x, _: f'{x:.2f}%'))
 
 for spine in ax.spines.values():
     spine.set_edgecolor('white')

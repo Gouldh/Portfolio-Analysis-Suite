@@ -39,8 +39,8 @@ STOCKS = {
     'DD': 800.0      # DuPont de Nemours, Inc.
 }
 
-ANALYSIS_START_DATE = '2013-11-18'
-ANALYSIS_END_DATE = '2023-11-18'
+ANALYSIS_START_DATE = '2013-11-21'
+ANALYSIS_END_DATE = '2023-11-21'
 BENCHMARK_INDEX = 'SPY'  # S&P 500 as the benchmark index
 RISK_FREE_RATE = 4.611 / 100  # Risk-free rate using 3-Year T-Bill Returns
 NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Monte Carlo simulation sample size

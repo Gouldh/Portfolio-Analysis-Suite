@@ -24,10 +24,21 @@ from matplotlib.ticker import FuncFormatter
 #       risk by comparing various portfolio allocations and their potential volatility.
 # -----------------------------------------------------------------------------------
 
+# Constants for analysis
+# List of stock tickers and their respective holdings
+STOCKS = {
+    'AAPL': 1500.0,  # Apple Inc.
+    'JNJ': 1200.0,   # Johnson & Johnson
+    'PG': 800.0,     # Procter & Gamble Co.
+    'JPM': 1300.0,   # JPMorgan Chase & Co.
+    'XOM': 700.0,    # Exxon Mobil Corporation
+    'MMM': 600.0,    # 3M Company
+    'SO': 500.0,     # Southern Company
+    'VZ': 600.0,     # Verizon Communications Inc.
+    'NKE': 1000.0,   # NIKE, Inc.
+    'DD': 800.0      # DuPont de Nemours, Inc.
+}
 
-# Portfolio Analysis Constants
-STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Diverse example stock tickers
-INITIAL_WEIGHTS = np.array([1 / len(STOCK_TICKERS)] * len(STOCK_TICKERS))  # Equal initial weights for each stock
 ANALYSIS_START_DATE = '2013-11-18'
 ANALYSIS_END_DATE = '2023-11-18'
 BENCHMARK_INDEX = 'SPY'  # S&P 500 as the benchmark index
@@ -38,8 +49,18 @@ NUMBER_OF_MONTE_CARLO_RUNS = 1_000  # Number of Monte Carlo runs for simulations
 
 
 print("\n================== Starting: Data Collection ==================\n")
+# Calculate stocks weights and tickers from dictionary
+def calculate_weights(stock_dict):
+    total_investment = sum(stock_dict.values())
+    weights = np.array([amount / total_investment for amount in stock_dict.values()])
+    tickers = list(stock_dict.keys())
+    return tickers, weights
+
+
+stock_tickers, initial_weights = calculate_weights(STOCKS)
+
 # Download adjusted close prices for the stocks and benchmark index
-stock_data = yf.download(STOCK_TICKERS, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
+stock_data = yf.download(stock_tickers, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 benchmark_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 print("\n================== Completed: Data Collection ==================\n")
 
@@ -56,13 +77,13 @@ print("Successfully Calculated Covariance Matrix.")
 
 # Initialize arrays for simulation results and recorded weights
 simulation_results = np.zeros((4, NUMBER_OF_PORTFOLIO_WEIGHTS))
-recorded_weights = np.zeros((len(STOCK_TICKERS), NUMBER_OF_PORTFOLIO_WEIGHTS))
+recorded_weights = np.zeros((len(stock_tickers), NUMBER_OF_PORTFOLIO_WEIGHTS))
 
 # Monte Carlo Simulation for finding optimal portfolio weights
 print("\nRunning Monte Carlo Simulation for Optimal Portfolio Weights...")
 for i in range(NUMBER_OF_PORTFOLIO_WEIGHTS):
     # Generate random weights and normalize them
-    random_weights = np.random.random(len(STOCK_TICKERS))
+    random_weights = np.random.random(len(stock_tickers))
     normalized_weights = random_weights / np.sum(random_weights)
     recorded_weights[:, i] = normalized_weights
 
@@ -103,7 +124,7 @@ benchmark_mean_return = benchmark_daily_returns.mean()
 benchmark_volatility = benchmark_daily_returns.std()
 
 # Define portfolio configurations for simulation
-portfolio_weights = {'Optimized Portfolio': optimal_weights, 'Current Portfolio': INITIAL_WEIGHTS, 'Median Portfolio': median_volatility_weights}
+portfolio_weights = {'Optimized Portfolio': optimal_weights, 'Current Portfolio': initial_weights, 'Median Portfolio': median_volatility_weights}
 portfolio_results = {name: [] for name in portfolio_weights.keys()}
 market_final_values = []
 
@@ -114,7 +135,7 @@ def run_simulation(weights, length, covariance_matrix):
     chol_matrix = np.linalg.cholesky(covariance_matrix)
 
     for _ in range(length):
-        correlated_random_returns = np.dot(chol_matrix, np.random.normal(size=(len(STOCK_TICKERS),)))
+        correlated_random_returns = np.dot(chol_matrix, np.random.normal(size=(len(stock_tickers),)))
         individual_asset_returns = daily_mean_returns + correlated_random_returns
         portfolio_return = np.dot(weights, individual_asset_returns)
         fund_value.append(fund_value[-1] * (1 + portfolio_return))
@@ -214,7 +235,7 @@ plt.text(0.69, 0.98, prob_text, fontsize=10, verticalalignment='top', ha='left',
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
 # Displaying the optimal weights as text
-optimal_weights_text = "Optimal Weights:\n" + "\n".join([f"{STOCK_TICKERS[i]}: {weight:.2f}%" for i, weight in enumerate(optimal_weights_percent)])
+optimal_weights_text = "Optimal Weights:\n" + "\n".join([f"{stock_tickers[i]}: {weight:.2f}%" for i, weight in enumerate(optimal_weights_percent)])
 plt.text(0.115, .98, optimal_weights_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 

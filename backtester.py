@@ -7,12 +7,18 @@ from matplotlib.ticker import FuncFormatter
 
 # -----------------------------------------------------------------------------------
 # Author: Hunter Gould
-# Date: 11/19/23
-# Description: backtester.py is part of a portfolio analysis suite.
-#              It offers backtesting capabilities, allowing users to test investment
-#              strategies against historical market data. This helps in understanding
-#              potential performance and risks associated with different investment
-#              approaches.
+# Date: 11/21/23
+# Description: This script is a part of a portfolio analysis suite designed for
+#              backtesting investment strategies using historical market data. It
+#              fetches data for user-chosen stock tickers and a benchmark index,
+#              then performs optimal portfolio weighting simulations using Monte Carlo
+#              methods. The script calculates daily returns, covariance matrices, and
+#              uses these to find optimal weights based on Sharpe ratio. It includes
+#              detailed analysis of simulated portfolios, comparing against the market
+#              benchmark. The script also extends to backtesting, evaluating the actual
+#              performance of the optimized portfolio in a subsequent time period.
+#              Visualization features include probability distribution plots for portfolio
+#              and market performance, showcasing potential and actual returns.
 #
 # Note: Remember that historical data does not guarantee future results. This backtesting
 #       tool is crucial for evaluating the robustness of investment strategies under
@@ -20,99 +26,110 @@ from matplotlib.ticker import FuncFormatter
 # -----------------------------------------------------------------------------------
 
 
-# Constants for portfolio analysis
-STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Stock tickers representing a diverse portfolio
-INITIAL_WEIGHTS = np.array([.1, .1, .1, .1, .1, .1, .1, .1, .1, .1])  # Initial weights assigned equally to each stock
+# Portfolio Analysis Constants
+STOCK_TICKERS = ['AAPL', 'JNJ', 'PG', 'JPM', 'XOM', 'MMM', 'SO', 'VZ', 'NKE', 'DD']  # Diverse example stock tickers
+INITIAL_WEIGHTS = np.array([1 / len(STOCK_TICKERS)] * len(STOCK_TICKERS))  # Equal initial weights for each stock
 ANALYSIS_START_DATE = '2013-11-18'
 ANALYSIS_END_DATE = '2018-11-18'
 TESTING_END_DATE = '2023-11-18'
-BENCHMARK_INDEX = 'SPY'  # Using S&P 500 as the benchmark index
-RISK_FREE_RATE = 4.611 / 100  # Using 3-Year T-Bill Returns as the risk-free rate
-NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Number of random portfolio weights for Monte Carlo simulation
-TRADING_DAYS_PER_YEAR = 252
-NUMBER_OF_MONTE_CARLO_RUNS = 1_000
+BENCHMARK_INDEX = 'SPY'  # S&P 500 as the benchmark index
+RISK_FREE_RATE = 4.611 / 100  # Risk-free rate using 3-Year T-Bill Returns
+NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Monte Carlo simulation sample size
+TRADING_DAYS_PER_YEAR = 252  # Number of trading days in a year
+NUMBER_OF_MONTE_CARLO_RUNS = 1_000  # Number of Monte Carlo runs for simulations
 
 # Data Collection
 print("\n================== Starting: Data Collection ==================\n")
+# Download adjusted close prices for the stocks and benchmark index
 stock_data = yf.download(STOCK_TICKERS, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 benchmark_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 print("\n================== Completed: Data Collection ==================\n")
 
 # Optimal Portfolio Weighting Simulation
 print("\n================== Starting: Optimal Portfolio Weighting Simulation ==================\n")
-# Calculating daily returns for stocks and the benchmark index
+# Calculate daily percentage returns for stocks and the benchmark
 stock_daily_returns = stock_data.pct_change().dropna()
 benchmark_daily_returns = benchmark_data.pct_change().dropna()
 print("Successfully Calculated Daily Returns.")
 
-# Generating the covariance matrix for the stock returns
+# Generate covariance matrix for the stock returns
 covariance_matrix = stock_daily_returns.cov()
 print("Successfully Calculated Covariance Matrix.")
 
-# Performing Monte Carlo Simulation to find optimal portfolio weights
+# Initialize arrays for simulation results and recorded weights
 simulation_results = np.zeros((4, NUMBER_OF_PORTFOLIO_WEIGHTS))
 recorded_weights = np.zeros((len(STOCK_TICKERS), NUMBER_OF_PORTFOLIO_WEIGHTS))
 
+# Monte Carlo Simulation for finding optimal portfolio weights
 print("\nRunning Monte Carlo Simulation for Optimal Portfolio Weights...")
 for i in range(NUMBER_OF_PORTFOLIO_WEIGHTS):
+    # Generate random weights and normalize them
     random_weights = np.random.random(len(STOCK_TICKERS))
     normalized_weights = random_weights / np.sum(random_weights)
     recorded_weights[:, i] = normalized_weights
+
+    # Calculate annualized return, standard deviation, and Sharpe ratio
     annualized_return = np.sum(normalized_weights * stock_daily_returns.mean()) * TRADING_DAYS_PER_YEAR
     annualized_stddev = np.sqrt(np.dot(normalized_weights.T, np.dot(covariance_matrix, normalized_weights))) * np.sqrt(TRADING_DAYS_PER_YEAR)
     sharpe_ratio = (annualized_return - RISK_FREE_RATE) / annualized_stddev
+
+    # Store simulation results
     simulation_results[:, i] = [annualized_return, annualized_stddev, sharpe_ratio, i]
 
+# Create DataFrame for simulated portfolios
 columns = ['Annualized Return', 'Annualized Volatility', 'Sharpe Ratio', 'Simulation Index']
 simulated_portfolios = pd.DataFrame(simulation_results.T, columns=columns)
 print("Monte Carlo Simulation Completed.")
 
-# Analysis of Simulated Portfolios
+# Sort portfolios by volatility and identify portfolios with optimal Sharpe ratio and median volatility
 sorted_by_volatility = simulated_portfolios.sort_values(by='Annualized Volatility').reset_index()
 optimal_sharpe_idx = simulated_portfolios['Sharpe Ratio'].idxmax()
 median_volatility_idx = sorted_by_volatility.iloc[len(sorted_by_volatility) // 2]['Simulation Index']
 print(f"Achieved Maximum Sharpe Ratio of: {simulated_portfolios['Sharpe Ratio'][optimal_sharpe_idx]:.2f}")
 
-# Extracting and displaying weights of optimal and median volatility portfolios
+# Display weights for optimal and median volatility portfolios
 optimal_weights = recorded_weights[:, optimal_sharpe_idx]
-optimal_weights_percent = optimal_weights * 100  # Converting to percentage
+optimal_weights_percent = optimal_weights * 100
 optimal_weights_percent_str = ', '.join([f"{weight:.2f}%" for weight in optimal_weights_percent])
 median_volatility_weights = recorded_weights[:, int(median_volatility_idx)]
 print(f"Optimal Weights for Maximum Sharpe Ratio: {optimal_weights_percent_str}")
 
 print("\n================== Completed: Optimal Portfolio Weighting Simulation ==================\n")
 
-# Probability Distribution Generation
+
 print("\n================== Starting: Probability Distribution Generation ==================\n")
-# Calculating mean and volatility of daily returns for each asset and benchmark
+# Calculate mean and volatility of daily returns for each asset and benchmark
 daily_mean_returns = stock_daily_returns.mean()
 daily_volatility = stock_daily_returns.std()
 benchmark_mean_return = benchmark_daily_returns.mean()
 benchmark_volatility = benchmark_daily_returns.std()
 
+# Define portfolio configurations for simulation
 portfolio_weights = {'Optimized Portfolio': optimal_weights, 'Current Portfolio': INITIAL_WEIGHTS, 'Median Portfolio': median_volatility_weights}
-
 portfolio_results = {name: [] for name in portfolio_weights.keys()}
 market_final_values = []
 
 # Defining a function for running Monte Carlo simulations
-def run_simulation(weights, length):
-    """Runs a Monte Carlo simulation for a given set of weights and time period."""
+def run_simulation(weights, length, covariance_matrix):
+    """Runs a Monte Carlo simulation for a given set of weights and time period, considering asset correlation."""
     fund_value = [10000]
+    chol_matrix = np.linalg.cholesky(covariance_matrix)
+
     for _ in range(length):
-        individual_asset_returns = np.random.normal(daily_mean_returns, daily_volatility)
+        correlated_random_returns = np.dot(chol_matrix, np.random.normal(size=(len(STOCK_TICKERS),)))
+        individual_asset_returns = daily_mean_returns + correlated_random_returns
         portfolio_return = np.dot(weights, individual_asset_returns)
         fund_value.append(fund_value[-1] * (1 + portfolio_return))
     return fund_value
 
-# Running simulations for each portfolio and the market
+# Run simulations for each portfolio and the market
 print("Running Portfolio Simulations...")
 portfolio_metrics = {}
 for portfolio_name, weights in portfolio_weights.items():
     final_values = []
     returns = []
     for _ in range(NUMBER_OF_MONTE_CARLO_RUNS):
-        simulated_fund_values = run_simulation(weights, TRADING_DAYS_PER_YEAR)
+        simulated_fund_values = run_simulation(weights, TRADING_DAYS_PER_YEAR, covariance_matrix)
         final_value = simulated_fund_values[-1]
         final_values.append(final_value)
         simulation_return = (final_value / 10000) - 1
@@ -123,7 +140,7 @@ for portfolio_name, weights in portfolio_weights.items():
     portfolio_metrics[portfolio_name] = (expected_return, volatility)
     print(f"Completed simulations for {portfolio_name} portfolio.")
 
-# Simulating market performance
+# Simulate market performance
 print("Simulating Market Performance...")
 for _ in range(NUMBER_OF_MONTE_CARLO_RUNS):
     market_fund_value = [10000]
@@ -132,7 +149,7 @@ for _ in range(NUMBER_OF_MONTE_CARLO_RUNS):
         market_fund_value.append(market_fund_value[-1] * (1 + market_return))
     market_final_values.append(market_fund_value[-1])
 
-# Calculating market performance statistics
+# Calculate market performance statistics
 market_final_values_percent = [(value / 10000 - 1) * 100 for value in market_final_values]
 market_expected_return = np.mean(market_final_values) / 10000 - 1
 market_volatility = np.std(market_final_values) / 10000
@@ -143,6 +160,7 @@ print("\n================== Completed: Probability Distribution Generation =====
 
 
 print("\n================== Starting: Backtesting ==================\n")
+# Download the new period data for the portfolio assets
 subsequent_data = yf.download(STOCK_TICKERS, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
 
 # Download the new period data for the market (SPY)
@@ -158,13 +176,13 @@ market_subsequent_return = subsequent_market_daily_returns.mean() * 252
 
 print("\n================== Completed: Backtesting ==================\n")
 
-# Plotting Results
+
 print("\n================== Starting: Plotting ==================\n")
-# Setting up the plot environment and plotting probability distributions for portfolios and market
+# Setup and configuration for probability distribution plots
 plt.figure(figsize=(16, 9), constrained_layout=True)
 ax = plt.gca()
 
-# Configuring plot aesthetics
+# Set plot aesthetics for readability
 plt.gcf().set_facecolor('black')
 ax.set_facecolor('black')
 ax.xaxis.label.set_color('white')
@@ -179,13 +197,16 @@ for spine in ax.spines.values():
 
 palette = sns.color_palette("hsv", len(portfolio_weights) + 1)
 
+# Mark real world results
 plt.axvline(x=market_subsequent_return * 100, color='Purple',)
 plt.axvline(x=portfolio_subsequent_return * 100, color='Yellow',)
-# Plotting the distributions for each portfolio
+
+# Plot probability distributions for each portfolio
 for i, (portfolio_name, final_values) in enumerate(portfolio_results.items()):
     color = palette[i]
     final_values_percent = [(value / 10000 - 1) * 100 for value in final_values]
     sns.kdeplot(final_values_percent, label=portfolio_name, color=color, ax=ax)
+    # Plotting performance metrics for each portfolio
     expected_return, volatility = portfolio_metrics[portfolio_name]
     plt.axvline(x=expected_return * 100, color=color, linestyle='--')
     sharpe_ratio = (expected_return - RISK_FREE_RATE) / volatility
@@ -196,10 +217,12 @@ for i, (portfolio_name, final_values) in enumerate(portfolio_results.items()):
              fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
              bbox=dict(boxstyle="round,pad=0.3", edgecolor=color, facecolor='black'))
 
-# Plotting and annotating market performance distribution
+# Plotting market performance distribution
 market_color = palette[-1]
 sns.kdeplot(market_final_values_percent, label=BENCHMARK_INDEX, color=market_color, ax=ax)
 plt.axvline(x=market_expected_return * 100, color=market_color, linestyle='--')
+
+# Adding market performance annotations
 plt.text(0.01, 0.98 - 0.1 * (len(portfolio_weights)),
          f'{BENCHMARK_INDEX}\n  Mean: {market_expected_return * 100:.2f}%\n  Volatility: {market_volatility * 100:.2f}%\n  Sharpe Ratio: {market_sharpe_ratio:.2f}',
          fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
@@ -223,11 +246,12 @@ plt.text(0.115, .98, optimal_weights_text, fontsize=10, verticalalignment='top',
 plt.text(0.67, 0.98, f"Actual Market Return: {market_subsequent_return:.2%}\nActual Optimized Portfolio Return: {portfolio_subsequent_return:.2%}", fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
-# Setting labels, title and legend
+# Finalizing plot settings
 plt.xlabel('Final Fund % Returns')
 plt.ylabel('Density')
 plt.title('Probability Distributions of Final Fund Returns for Different Portfolios', color='white')
 plt.legend(loc='best')
 
+# Display the plot
 print("\n================== Completed: Plotting ==================\n")
 plt.show()

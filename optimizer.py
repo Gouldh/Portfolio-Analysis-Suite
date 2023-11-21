@@ -36,14 +36,14 @@ NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Monte Carlo simulation sample size
 TRADING_DAYS_PER_YEAR = 252  # Number of trading days in a year
 NUMBER_OF_MONTE_CARLO_RUNS = 1_000  # Number of Monte Carlo runs for simulations
 
-# Data Collection
+
 print("\n================== Starting: Data Collection ==================\n")
 # Download adjusted close prices for the stocks and benchmark index
 stock_data = yf.download(STOCK_TICKERS, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 benchmark_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
 print("\n================== Completed: Data Collection ==================\n")
 
-# Optimal Portfolio Weighting Simulation
+
 print("\n================== Starting: Optimal Portfolio Weighting Simulation ==================\n")
 # Calculate daily percentage returns for stocks and the benchmark
 stock_daily_returns = stock_data.pct_change().dropna()
@@ -156,7 +156,7 @@ print("Market Performance Simulation Completed.")
 
 print("\n================== Completed: Probability Distribution Generation ==================\n")
 
-# Plotting Results
+
 print("\n================== Starting: Plotting ==================\n")
 # Setup and configuration for probability distribution plots
 plt.figure(figsize=(16, 9), constrained_layout=True)

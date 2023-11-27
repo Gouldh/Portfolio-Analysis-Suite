@@ -7,7 +7,7 @@ from matplotlib.ticker import FuncFormatter
 
 # -----------------------------------------------------------------------------------
 # Author: Hunter Gould
-# Date: 11/21/23
+# Date: 11/26/23
 # Description: This script is a part of a portfolio analysis suite designed for
 #              backtesting investment strategies using historical market data. It
 #              fetches data for user-chosen stock tickers and a benchmark index,
@@ -40,9 +40,9 @@ STOCKS = {
     'DD': 800.0      # DuPont de Nemours, Inc.
 }
 
-ANALYSIS_START_DATE = '2013-11-21'
-ANALYSIS_END_DATE = '2018-11-21'
-TESTING_END_DATE = '2023-11-21'
+ANALYSIS_START_DATE = '2013-11-26'
+ANALYSIS_END_DATE = '2018-11-26'
+TESTING_END_DATE = '2023-11-26'
 BENCHMARK_INDEX = 'SPY'  # S&P 500 as the benchmark index
 RISK_FREE_RATE = 4.611 / 100  # Risk-free rate using 3-Year T-Bill Returns
 NUMBER_OF_PORTFOLIO_WEIGHTS = 10_000  # Monte Carlo simulation sample size
@@ -187,9 +187,13 @@ subsequent_data = yf.download(stock_tickers, start=ANALYSIS_END_DATE, end=TESTIN
 # Download the new period data for the market (SPY)
 subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
 
-# Calculate the portfolio returns using the optimal weights
-subsequent_daily_returns = subsequent_data.pct_change().dropna()
-portfolio_subsequent_return = np.sum(optimal_weights * subsequent_daily_returns.mean()) * 252
+# Calculate the optimal portfolio returns using the optimal weights
+optimal_subsequent_daily_returns = subsequent_data.pct_change().dropna()
+optimal_portfolio_subsequent_return = np.sum(optimal_weights * optimal_subsequent_daily_returns.mean()) * 252
+
+# Calculate the current portfolio returns using the optimal weights
+current_subsequent_daily_returns = subsequent_data.pct_change().dropna()
+current_portfolio_subsequent_return = np.sum(initial_weights * current_subsequent_daily_returns.mean()) * 252
 
 # Calculate the market returns for the same period
 subsequent_market_daily_returns = subsequent_market_data.pct_change().dropna()
@@ -219,8 +223,9 @@ for spine in ax.spines.values():
 palette = sns.color_palette("hsv", len(portfolio_weights) + 1)
 
 # Mark real world results
-plt.axvline(x=market_subsequent_return * 100, color='Purple',)
-plt.axvline(x=portfolio_subsequent_return * 100, color='Yellow',)
+plt.axvline(x=market_subsequent_return * 100, color=palette[-1],)
+plt.axvline(x=optimal_portfolio_subsequent_return * 100, color=palette[0],)
+plt.axvline(x=current_portfolio_subsequent_return * 100, color=palette[1],)
 
 # Plot probability distributions for each portfolio
 for i, (portfolio_name, final_values) in enumerate(portfolio_results.items()):
@@ -255,7 +260,7 @@ optimal_beats_market = sum(np.array(portfolio_results['Optimized Portfolio']) > 
 
 # Displaying the probability comparison as text
 prob_text = f"Probability Optimal > Current: {optimal_beats_initial:.2%}\nProbability Optimal > Market: {optimal_beats_market:.2%}"
-plt.text(0.67, 0.92, prob_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
+plt.text(0.67, 0.90, prob_text, fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
 # Displaying the optimal weights as text
@@ -264,7 +269,7 @@ plt.text(0.115, .98, optimal_weights_text, fontsize=10, verticalalignment='top',
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
 # Displaying actual results from time period selected
-plt.text(0.67, 0.98, f"Actual Market Return: {market_subsequent_return:.2%}\nActual Optimized Portfolio Return: {portfolio_subsequent_return:.2%}", fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
+plt.text(0.67, 0.98, f"Actual Optimized Portfolio Return: {optimal_portfolio_subsequent_return:.2%}\nActual Original Portfolio Return: {current_portfolio_subsequent_return:.2%}\nActual Market Return: {market_subsequent_return:.2%}", fontsize=10, verticalalignment='top', ha='left', color='white', transform=ax.transAxes,
          bbox=dict(boxstyle="round,pad=0.3", edgecolor='grey', facecolor='black'))
 
 # Finalizing plot settings

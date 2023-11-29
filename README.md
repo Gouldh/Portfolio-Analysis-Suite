@@ -1,7 +1,7 @@
 # Comprehensive Portfolio Analysis Suite
 
 ## Project Overview
-This repository hosts a comprehensive portfolio analysis suite, designed to provide deep insights into investment strategies. The suite consists of two main components: a portfolio optimizer (`optimizer.py`) and a backtesting tool (`backtester.py`). The optimizer uses Monte Carlo simulations for asset allocation, while the backtester assesses strategies against historical data. Built with Python, the suite leverages libraries such as `yfinance` for financial data, `numpy` and `pandas` for numerical analysis and data management, and `matplotlib` and `seaborn` for advanced visualizations.
+This repository hosts a small portfolio analysis suite, designed to provide deep insights into investment strategies. The suite consists of two main components: a portfolio optimizerand a backtesting tool. The optimizer uses Monte Carlo simulations for asset allocation, while the backtester assesses strategies against historical data.
 
 ## Features
 - **Portfolio Optimization**: The optimizer conducts simulations to find the ideal asset allocation, maximizing returns and minimizing risks.
@@ -10,6 +10,13 @@ This repository hosts a comprehensive portfolio analysis suite, designed to prov
 - **Comprehensive Data Analysis**: Analyzes a wide range of stock data over extensive periods, employing tools like `numpy` and `pandas` for robust data handling.
 - **Interactive Analysis**: Users can customize analysis parameters to suit different investment scenarios and strategies.
 - **Historical Benchmarking**: Compares portfolio performance against major benchmarks like the S&P 500, offering a relative performance perspective.
+
+## Libraries
+- `yfinance`: Primary source for downloading stock and market data. It is used across both modules to fetch historical stock prices and other financial data for analysis.
+- `numpy`: Utilized for array and numerical computations. It is particularly used in the optimization process for handling arrays and performing mathematical operations.
+- `matplotlib` and `seaborn`: Both crucial for data visualization. While matplotlib is used for plotting graphs and charts, seaborn enhances these visualizations with more attractive and informative statistical graphics.
+- `pandas`: Essential for data manipulation and transformation. It is used to handle dataframes, perform data cleaning, and prepare datasets for analysis and visualization.
+
 
 ## Installation
 To use the Portfolio Analysis Suite, follow these steps:
@@ -44,16 +51,13 @@ python backtester.py
 ```
 This tool assesses investment strategies against historical market data, providing a realistic assessment of potential performance and risk.
 
-Ensure your Python environment is set up with necessary libraries such as `yfinance`, `numpy`, `pandas`, `matplotlib`, and `seaborn`.
-
-## Contributing
-Contributions to the Portfolio Analysis Suite are welcome.
-
-## Support
-If you encounter any issues or have questions, feel free to open an issue on the GitHub repository.
-
-## Authors
-- Hunter Gould 
+## Sample Output
+Below is an example of the output produced by running the code with sample input parameters. The first chart shows the result of running `optimizer.py`, and the second chart shows the result of running `backtester.py`.
+![Optimizer Sample Output](https://github.com/Gouldh/Portfolio-Analysis-Suite/blob/main/Portfolio%20Analysis%20Suite%20Optimizer%20Sample%20Output.png)
+![Backtester Sample Output](https://github.com/Gouldh/Portfolio-Analysis-Suite/blob/main/Portfolio%20Analysis%20Suite%20Backtester%20Sample%20Output.png)
 
 ## License
 This project is licensed under the MIT License - see the `LICENSE` file for details.
+
+**Author**: Hunter Gould         
+**Date**: 11/26/2023

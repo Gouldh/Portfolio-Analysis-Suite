@@ -1,7 +1,7 @@
-# Comprehensive Portfolio Analysis Suite
+# Portfolio Analysis Suite
 
 ## Project Overview
-This repository hosts a small portfolio analysis suite, designed to provide deep insights into investment strategies. The suite consists of two main components: a portfolio optimizerand a backtesting tool. The optimizer uses Monte Carlo simulations for asset allocation, while the backtester assesses strategies against historical data.
+This repository hosts a small portfolio analysis suite, designed to provide deep insights into investment strategies. The suite consists of two main components: a portfolio optimizerand a backtesting tool. The optimizer uses Monte Carlo simulations for asset allocation, while the backtester assesses strategies against historical data. Based on optimization ideas found in [previous projects](https://github.com/Gouldh/Monte-Carlo-Portfolio-Optimization), this project expands upon analysis available for an optimized portfolio.
 
 ## Features
 - **Portfolio Optimization**: The optimizer conducts simulations to find the ideal asset allocation, maximizing returns and minimizing risks.

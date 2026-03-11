@@ -62,8 +62,8 @@ def calculate_weights(stock_dict):
 stock_tickers, initial_weights = calculate_weights(STOCKS)
 
 # Download adjusted close prices for the stocks and benchmark index
-stock_data = yf.download(stock_tickers, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
-benchmark_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE)['Adj Close']
+stock_data = yf.download(stock_tickers, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE, auto_adjust=True)['Close']
+benchmark_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_START_DATE, end=ANALYSIS_END_DATE, auto_adjust=True)['Close']
 print("\n================== Completed: Data Collection ==================\n")
 
 

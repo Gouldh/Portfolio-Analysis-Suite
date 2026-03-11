@@ -182,10 +182,10 @@ print("\n================== Completed: Probability Distribution Generation =====
 
 print("\n================== Starting: Backtesting ==================\n")
 # Download the new period data for the portfolio assets
-subsequent_data = yf.download(stock_tickers, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+subsequent_data = yf.download(stock_tickers, start=ANALYSIS_END_DATE, end=TESTING_END_DATE, auto_adjust=True)['Close']
 
 # Download the new period data for the market (SPY)
-subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE)['Adj Close']
+subsequent_market_data = yf.download(BENCHMARK_INDEX, start=ANALYSIS_END_DATE, end=TESTING_END_DATE, auto_adjust=True)['Close']
 
 # Calculate the optimal portfolio returns using the optimal weights
 optimal_subsequent_daily_returns = subsequent_data.pct_change().dropna()
